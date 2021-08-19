@@ -91,7 +91,7 @@ subset <- san_fran %>%
 Task 3: Do your data viz best
 Create a finalized graph (as perfect as you can make it) using the San Francisco GHG emissions dataset. You get to choose what you want to visualize. You can pick which variables & observations you’re interested in. You may want to do some wrangling / summarizing first.
 
-```{r}
+```{r, fig.alt = "San Francisco greenhouse gas emissions by sector. Commercial and Institutional Buildings and Facilities had the greatest emissions."}
 sector_emissions_2005 <- san_fran %>% 
   group_by(Sector_GPC_Detail, Calendar_Year) %>% 
   summarize(Emissions_mtCO2e = sum(Emissions_mtCO2e)) %>%
@@ -115,9 +115,6 @@ ggsave(filename = here("figs", "SF_Gas_Emissions.png"))
 
 
 
-Once you’ve decided on what to plot, create the best graph that you can to communicate what’s going on with the data.
-
-Once you’re done, drop your best graph (as a .png or .jpg) into the course Slack channel.
 
 
 
