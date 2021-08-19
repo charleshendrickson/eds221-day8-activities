@@ -1,0 +1,144 @@
+---
+title: "ggplot_activity"
+author: "Charles Hendrickson"
+date: "8/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+
+# specifically for data-viz
+library(patchwork)
+library(ggrepel)
+library(gghighlight)
+library(paletteer)
+library(ggExtra)
+library(ggbeeswarm)
+library(gapminder)
+library(sf)
+```
+
+## Read in data
+```{r}
+space_launches <- read.csv(here("data", "space_launches.csv"))
+
+```
+
+# Task 1: Do your data viz worst
+Just like it takes a lot of work to make a really wonderful graph, it takes effort to make a graph really awful. Put effort and creativity into this - you will learn a lot in the process if you do.
+
+```{r}
+sucky_plot <- ggplot(space_launches, aes(x = type, y = launch_year)) +
+  geom_point(shape = 22,
+             fill = "yellow",
+             color = "purple",
+             size = 4,
+             alpha = 0.5) +
+  theme(
+    panel.grid = element_blank(),
+    plot.background = element_rect(fill = "green"),
+    axis.text.x = element_text(color = "brown"),
+    axis.title = element_text(color = "purple", size = 15))+
+  ggtitle("THIS GRAPH SUCKS", subtitle = "by Dr. I HAVE NO IDEA WHAT I'M DOING")
+
+
+  
+```
+```{r}
+ggsave(filename = here("figs", "sucky_plot.png"))
+```
+
+
+Task 2: Wrangling practice with the SF Greenhouse Gas data
+Download the San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv file (I’ll put this in Slack). Information about the data is available here.
+
+Read in the SF emissions dataset, then complete the following:
+
+```{r}
+san_fran <- read.csv(here("data",
+              "San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv"))
+```
+
+Create a summary table of total annual greenhouse gas emissions (only from Emissions_mtCO2e column) by sector_general
+
+```{r}
+emissions_total <- san_fran %>% 
+  group_by(Sector_General) %>% 
+  summarize(Emissions_mtCO2e_total = sum(Emissions_mtCO2e, na.rm = TRUE))
+```
+
+
+Create a summary table of total annual greenhouse gas emissions (only from Emissions_mtCO2e column) by year and commodity type
+```{r}
+emissions_total_2 <- san_fran %>% 
+  group_by(Calendar_Year, Commodity_Type) %>% 
+  summarize(Emissions_mtCO2e_total = sum(Emissions_mtCO2e, na.rm = TRUE))
+```
+
+Create a subset of the data that only contains observations from 2005 on, only for observations where Sector_Detail2 contains the pattern “PG&E”, then limit to columns Calendar_Year, Sector_Detail2 and Emissions_mtCO2e.
+
+```{r}
+subset <- san_fran %>% 
+  filter(Calendar_Year >= 2005)%>% 
+  filter(str_detect(Sector_Detail2, pattern = "PG&E")) %>% 
+  select(Calendar_Year, Sector_Detail2, Emissions_mtCO2e)
+```
+
+Task 3: Do your data viz best
+Create a finalized graph (as perfect as you can make it) using the San Francisco GHG emissions dataset. You get to choose what you want to visualize. You can pick which variables & observations you’re interested in. You may want to do some wrangling / summarizing first.
+
+```{r}
+sector_emissions_2005 <- san_fran %>% 
+  group_by(Sector_GPC_Detail, Calendar_Year) %>% 
+  summarize(Emissions_mtCO2e = sum(Emissions_mtCO2e)) %>%
+  ungroup() %>% 
+  filter(Calendar_Year %in% c(2005)) %>% 
+  arrange(Emissions_mtCO2e) %>% 
+  mutate(Sector_GPC_Detail = fct_inorder(Sector_GPC_Detail) %>% 
+           fct_rev())
+
+
+
+ggplot(sector_emissions_2005, aes(y = Sector_GPC_Detail, x = Emissions_mtCO2e)) +
+  geom_col(fill = "red")+
+           theme(panel.grid = element_blank()) +
+ggtitle("San Francisco Greenhouse Gas Emissions \nby Sector") +
+  xlab("Greenhouse Gas Emissions (metric tons CO2e)") +
+  ylab("Sector")
+
+ggsave(filename = here("figs", "SF_Gas_Emissions.png"))
+```
+
+
+
+Once you’ve decided on what to plot, create the best graph that you can to communicate what’s going on with the data.
+
+Once you’re done, drop your best graph (as a .png or .jpg) into the course Slack channel.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
